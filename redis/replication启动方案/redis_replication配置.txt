@@ -1,0 +1,24 @@
+1、强制读写分离
+基于主从复制架构，实现读写分离
+redis slave node只读，默认开启，slave-read-only
+开启了只读的redis slave node，会拒绝所有的写操作，这样可以强制搭建成读写分离的架构
+
+2、集群安全认证
+master上启用安全认证，requirepass
+master连接口令，masterauth
+
+3、读写分离架构的测试
+先启动主节点，再启动从节点
+
+刚才我调试了一下，redis slave node一直说没法连接到主节点的6379的端口
+
+在搭建生产环境的集群的时候，不要忘记修改一个配置，bind
+bind 127.0.0.1 -> 本地的开发调试的模式，就只能127.0.0.1本地才能访问到6379的端口
+
+每个redis.conf中的bind 127.0.0.1 -> bind自己的ip地址
+在每个节点上都: iptables -A INPUT -ptcp --dport  6379 -j ACCEPT
+
+redis-cli -h ipaddr
+info replication
+
+在主上写，在从上读
