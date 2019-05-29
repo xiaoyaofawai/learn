@@ -1,0 +1,15 @@
+ 添加master节点脚本，添加之后新加入的机器并不会被分配slot，需要reshard
+ redis-cli --cluster add-node 192.168.0.203:7007 192.168.0.201:7001
+
+ reshard命令：
+ redis-cli --cluster reshard 192.168.0.201:7002
+
+
+
+添加slave脚本
+redis-cli --cluster add-node --cluster-slave --cluster-master-id asdasdadsdqwe 192.168.0.203:7008 192.168.0.201:7001
+
+
+删除一个节点，删除前要先把slot转移到其他节点上，再进行删除
+1、使用reshard转移slot
+2、redis-cli --cluster del-node 192.168.0.201:7001 `<node-id>`
