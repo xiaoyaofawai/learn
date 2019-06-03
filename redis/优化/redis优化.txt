@@ -1,0 +1,60 @@
+1、fork耗时导致高并发请求延时
+fork的时候，子进程是需要拷贝父进程的空间内存页表的，需要耗费一定时间。
+一般，如果父进程内存有1个G的数据，那么fork可能会耗费20ms左右，如果是10G~30G，那么就会耗费20*10甚至20*30，也就是几百毫秒的时间
+info stats中的lastest_fork_usec，可以看到最近一次fork的时长
+并发高的时候，会拖慢很多条请求时长
+
+优化思路
+fork耗时跟redis主进程的内存有关系，一般控制redis内存在10GB以内，slave -> master，全量复制也会很慢
+
+
+2、AOF阻塞问题
+redis将数据写入AOF缓冲区，单独开一个线程做fsync操作，每秒一次（默认）
+但是redis主进程会检查两次fsync的时间，如果距离上次fsync时间超过了2s。那么写请求就会阻塞，所以最多会丢2s的数据
+fsync超过2s的延时，整个redis就会被拖慢
+
+优化思路
+优化硬盘写入速度，采用SSD
+
+
+3、主从复制延迟问题
+主从复制可能会严重超时，info replication命令可以看到主从复制情况
+master_repl_offset:24582
+slave_repl_offset:24582
+可以通过差值判断延迟情况，如果延迟过多就进行报警
+
+
+4、主从复制风暴问题
+如果让多个slave从master去执行全量复制，一份大的rdb同时发送到多个slave，会导致网络带宽被占用严重。
+
+优化
+主从复制使用树状结构，不要使用星型结构
+
+
+
+内核参数修改
+
+5、vm.overcommit_memory
+    0：检查是否有足够内存，没有的话申请内存失败
+    1：允许使用内存，知道用完为止
+    2：内存地址空间不能超过swap + 50%
+
+如果设置为0，可能导致fork等操作执行失败，申请不到足够的内存空间
+
+cat /proc/sys/vm/overcommit_memory
+echo "vm.overcommit_memory=1" >> /etc/sysctl.conf
+sysctl vm.overcommit_memory=1
+
+6、swapiness
+cat /proc/version，查看linux内核版本
+如果linux内核版本<3.5，那么swapiness设置为0，这样系统宁愿swap也不会oom killer（杀掉进程）
+如果linux内核版本>=3.5，那么swapiness设置为1，这样系统宁愿swap也不会oom killer（杀掉进程）
+保证redis不会被杀掉
+（这个设置可能不一定合适）
+
+7、最大打开文件句柄
+ulimit -n 10032
+
+8、tcp baklog
+cat /proc/sys/net/core/somaxconn
+echo 511 > /proc/sys/net/core/somaxconn
