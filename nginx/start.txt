@@ -1,0 +1,31 @@
+1、nginx -s 信号
+stop
+quit    优雅停机，等待工作进程结束当前请求后再停机
+reload  重新加载配置文件
+    当master进程接收到reload请求后，验证配置文件，验证成功后开启新的worker进程，
+    并通知老的worker进程停止接受新的连接。知道所有的请求处理完，老的worker进程退出。
+reopen  重新生成日志文件
+    mv原日志文件之后，nginx写文件会继续在原来的文件中添加，不会重新生成新的日志文件。
+    reopen会重新生成一个日志文件。
+
+
+
+2、映射静态文件
+location / {
+    root /data/www;     #在文件目录的基础上，加上匹配的地址
+    alias /data/www;    #将匹配的地址转换为目录
+}
+举例：
+alias:
+location /img/ {
+    alias E://imgs/;
+}
+http://localhost/img/nginx.png
+访问路径为：E://imgs/nginx.png
+
+root:
+location /img/ {
+    alias E://imgs/;
+}
+http://localhost/img/nginx.png
+访问路径为：E://imgs/img/nginx.png
