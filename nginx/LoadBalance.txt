@@ -1,0 +1,40 @@
+1、配置方式
+http {
+    upstream myapp1 {
+        server srv1.example.com;
+        server srv2.example.com;
+        server srv3.example.com;
+    }
+
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://myapp1;
+        }
+    }
+}
+默认采用轮训的方式进行负载
+
+2、最少连接方式负载
+upstream myapp1 {
+    least_conn;
+    server srv1.example.com;
+    server srv2.example.com;
+    server srv3.example.com;
+}
+
+3、ip-hash方式负载
+可以保证同一来源的请求时钟被分配到同一台机器
+upstream myapp1 {
+    ip_hash;
+    server srv1.example.com;
+    server srv2.example.com;
+    server srv3.example.com;
+}
+
+4、权重负载
+upstream myapp1 {
+    server srv1.example.com weight=3;
+    server srv2.example.com;
+    server srv3.example.com;
+}
