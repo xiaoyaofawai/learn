@@ -1,0 +1,35 @@
+1、worker_connections
+worker_connections表示nginx每一个worker进程能够建立的最大连接数。
+一个nginx能建立的最大连接数应该是：worker_connections * worker_processes。
+对于http请求本地资源来说，能够建立的最大并发数量是worker_connections * worker_processes
+对于http反向代理来说，最大并发数量是worker_connections * worker_processes/2
+
+2、ngx_accept_disabled
+nginx使用一个叫ngx_accept_disabled的变量来控制是否去竞争accept_mutex锁。
+ngx_accept_disabled是nginx单进程的所有连接总数的八分之一，减去剩下的空闲连接数量。
+当剩余连接数小于总连接数的八分之一时，其值才大于0，而剩余连接数越小，这个值越大。
+当ngx_accept_disabled大于0的时候，不回去尝试获取accept_mutex锁，并且将ngx_accept_disabled减1,
+不去获取accept_mutex锁就是等于让出获取连接的机会。
+
+ngx_accept_disabled = ngx_cycle->connection_n / 8
+    - ngx_cycle->free_connection_n;
+
+if (ngx_accept_disabled > 0) {
+    ngx_accept_disabled--;
+
+} else {
+    if (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) {
+        return;
+    }
+
+    if (ngx_accept_mutex_held) {
+        flags |= NGX_POST_EVENTS;
+
+    } else {
+        if (timer == NGX_TIMER_INFINITE
+                || timer > ngx_accept_mutex_delay)
+        {
+            timer = ngx_accept_mutex_delay;
+        }
+    }
+}
