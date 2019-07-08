@@ -1,0 +1,12 @@
+location / {
+    autoindex on;
+}
+
+autoindex on | off;
+开启或者禁用目录列表输出功能
+
+autoindex_exact_size on | off;
+明确是否文件大小要被展示在目录列表，或者四舍五入到千字节、兆字节、和G字节
+
+autoindex_format html | xml | json | jsonp;
+设置目录列表的格式。当JSONP格式被使用，

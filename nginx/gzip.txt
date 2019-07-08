@@ -1,0 +1,46 @@
+gzip            on;
+
+
+gzip_buffers    number size;
+默认：gzip_buffers    32 4K|16 8k;
+设置压缩缓冲区的数量和大小。默认，缓冲区大小等于一个内存页的大小。取决于平台，4K或者8K。
+
+
+gzip_comp_level level
+默认：gzip_comp_level 1
+设置压缩等级，范围是1-9
+
+
+gzip_disable    regex;
+配置不压缩的规则，匹配header里User-Agent的任意一个值
+
+
+gzip_http_version   1.0|1.1;
+默认：gzip_http_version   1.1;
+设置需要压缩的最小的HTTP版本
+
+
+gzip_min_length     length;
+默认：gzip_min_length     20;
+设置响应需要压缩的最小的长度。长度值决定于相应的Content-Length字段
+
+gzip_types      mime-type;
+默认：gzip_types   text/html;
+使用*表示任何类型的资源都进行压缩
+
+gzip_vary       on | off;
+默认：gzip_vary       off;
+开启或关闭：在响应头中添加“Vary: Accept-Encoding”
+
+
+gzip_proxied    off | expired | no-cache | no-store | private | no_last_modified | no_etag | auth | any ...;
+默认：gzip_proxied     off;
+Nginx作为反向代理的时候启用，根据某些请求和应答来决定是否在对代理请求的应答启用gzip压缩，是否压缩取决于请求头中的“Via”字段，指令中可以同时指定多个不同的参数，意义如下：
+expired - 启用压缩，如果header头中包含 "Expires" 头信息
+no-cache - 启用压缩，如果header头中包含 "Cache-Control:no-cache" 头信息
+no-store - 启用压缩，如果header头中包含 "Cache-Control:no-store" 头信息
+private - 启用压缩，如果header头中包含 "Cache-Control:private" 头信息
+no_last_modified - 启用压缩,如果header头中不包含 "Last-Modified" 头信息
+no_etag - 启用压缩 ,如果header头中不包含 "ETag" 头信息
+auth - 启用压缩 , 如果header头中包含 "Authorization" 头信息
+any - 无条件启用压缩
