@@ -1,0 +1,26 @@
+proxy_cache_path
+    path                        缓存路径
+    [levels=levels]
+    [use_temp_path=on|off]
+    keys_zone=name:size         共享内存大小，key放在共享内存中的
+    [inactive=time]             失效时间
+    [max_size=size]
+    [manager_files=number]
+    [manager_sleep=time]
+    [manager_threshold=time]
+    [loader_files=number]
+    [loader_sleep=time]
+    [loader_threshold=time]
+    [purger=on|off]
+    [purger_files=number]
+    [purger_sleep=time]
+    [purger_threshold=time];
+
+
+
+location / {
+    proxy_cache mycache;    //使用内存的路径下添加
+
+    proxy_cache_key $host$uri$is_args$args;        //缓存的key
+    proxy_cache_valid   200 304 320 1d;            //设置不同状态码的缓存时间
+}
